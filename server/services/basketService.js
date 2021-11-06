@@ -1,6 +1,6 @@
 const {Basket, BasketDevice } = require("../models/models");
 
-const {isEmptyObj} = require('../helpers/helper');
+const {isEmptyObj} = require('../helpers/baseHelper');
 
 class BasketService{
   async create(userId){

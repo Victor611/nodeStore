@@ -44,13 +44,42 @@ const TypeBrand = sequelize.define('type_brand', {
 
 const User = sequelize.define('user', {
   id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
-  email: {type: DataTypes.STRING, unique: true},
-  password: { type: DataTypes.STRING},
+  first_name: {type: DataTypes.STRING},
+  last_name: {type: DataTypes.STRING},
+  birthday: {type: DataTypes.DATE},
+  gender: {type: DataTypes.SMALLINT},
   role: {type: DataTypes.STRING, defaultValue: "user"},
+  activate: {type: DataTypes.BOOLEAN, defaultValue: false}
+})
+
+const Email = sequelize.define('email', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  email: {type: DataTypes.STRING, unique: true, allowNull:false},
+  hashPassword: { type: DataTypes.STRING},
+  activationLink: {type: DataTypes.STRING},
+  activate: {type: DataTypes.BOOLEAN, defaultValue: false },
+  disabled: {type: DataTypes.BOOLEAN, defaultValue: false}
+})
+
+const Phone = sequelize.define('phone', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  phone: {type: DataTypes.STRING, unique: true},
+  hashPassword: { type: DataTypes.STRING},
+  activationLink: {type: DataTypes.STRING},
+  activate: {type: DataTypes.BOOLEAN, defaultValue: false},
+  disabled: {type: DataTypes.BOOLEAN, defaultValue: false}
+})
+
+const Token = sequelize.define('token', {
+  id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+  refresh_token: {type: DataTypes.STRING, allowNull:false}
 })
 
 User.hasOne(Basket)
 User.hasMany(Rating)
+User.hasMany(Email)
+User.hasMany(Phone)
+User.hasOne(Token)
 
 Type.hasMany(Device)
 Type.belongsToMany(Brand, {through: TypeBrand})
@@ -75,4 +104,10 @@ Basket.hasMany(BasketDevice)
 BasketDevice.belongsTo(Basket)
 BasketDevice.belongsTo(Device)
 
-module.exports = {Basket, BasketDevice, Brand, Device, DeviceInfo, Rating, Type, TypeBrand, User}
+Email.belongsTo(User)
+
+Phone.belongsTo(User)
+
+Token.belongsTo(User)
+
+module.exports = {Basket, BasketDevice, Brand, Device, DeviceInfo, Rating, Type, TypeBrand, User, Email, Phone, Token}

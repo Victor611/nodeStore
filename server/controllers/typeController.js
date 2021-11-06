@@ -1,6 +1,6 @@
 const {ApiError} = require('../errors/ApiError');
 const {create, getAll} = require('../services/typeService');
-const {isEmptyObj} = require('../helpers/helper');
+const {isEmptyObj} = require('../helpers/baseHelper');
 
 class TypeController{
   async create(req, res, next){

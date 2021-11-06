@@ -1,6 +1,6 @@
 const {Type} = require('../models/models');
 const {ApiError} = require('../errors/ApiError');
-const {isEmptyObj} = require('../helpers/helper');
+const {isEmptyObj} = require('../helpers/baseHelper');
 
 class TypeService{
   

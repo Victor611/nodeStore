@@ -1,9 +1,8 @@
-const uuid = require('uuid');
 const path = require('path');
 
 const {create, getAll, getOne, createInfo} = require('../services/deviceService');
 const {ApiError} = require('../errors/ApiError');
-const {isEmptyObj, imageMime} = require('../helpers/helper');
+const {isEmptyObj, imageMime, randomString} = require('../helpers/baseHelper');
 
 class DeviceController{
   async create(req, res, next){
@@ -13,7 +12,7 @@ class DeviceController{
       const {name, price, brandId, typeId, info} = req.body
       const {img} = req.files
 
-      let fileName = uuid.v4() + imageMime(img.mimetype)
+      let fileName = randomString + imageMime(img.mimetype)
       img.mv(path.resolve(__dirname, '..', 'public/images', fileName))
 
       const device = await create(name, price, brandId, typeId, fileName)

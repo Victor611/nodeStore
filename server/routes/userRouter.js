@@ -1,9 +1,11 @@
 var express = require('express');
 var router = express.Router();
 
-const {} = require('../controllers/userController')
+const {getAll, getOne} = require('../controllers/userController');
+const auth = require('../middleweare/authMiddleweare');
+const checkRole = require('../middleweare/checkRoleMiddleweare');
 
-router.post('/')
-router.get('/')
+router.get('/', auth, checkRole("admin"), getAll)
+router.get('/:id', auth, getOne)
 
 module.exports = router;

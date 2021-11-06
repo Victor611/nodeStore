@@ -1,5 +1,6 @@
 const {ApiError} = require('../errors/ApiError'); 
-const bcryptjs = require('bcryptjs');
+
+
 
 module.exports.isEmptyObj = (obj) => {
   for(var key in obj)
@@ -21,13 +22,8 @@ module.exports.imageMime = (data) => {
   throw ApiError.badRequest(`${data}: неподдерживаемый тип фала`);
 }
 
-module.exports.bcryptPassword = async (password) => {
-  const hashPassword = await bcryptjs.hash(password, parseInt(process.env.BCRYPT_SALT))
-  return hashPassword;
-}
-
-module.exports.decryptPassword = (password, userPassword) => {
-  const comparePasword = bcryptjs.compareSync(password, userPassword)
-  if(!comparePasword) throw ApiError.badRequest(`неверный пароль`);
-  return true
-}
+module.exports.getRandomInt = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min; //Максимум не включается, минимум включается
+};

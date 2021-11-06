@@ -1,6 +1,6 @@
 const {ApiError} = require('../errors/ApiError');
 const {create, getAll} = require('../services/brandService');
-const {isEmptyObj} = require('../helpers/helper');
+const {isEmptyObj} = require('../helpers/baseHelper');
 
 class BrandController{
   async create(req, res, next){

@@ -1,27 +1,40 @@
-const UserService = require('../services/userService')
+const {createByEmail} = require('../services/userService')
 const BasketService = require('../services/basketService');
 const TokenService = require('../services/tokenService');
 
 const {ApiError} = require('../errors/ApiError')
-const {isEmptyObj, bcryptPassword, decryptPassword} = require('../helpers/helper')
+const {isEmptyObj, bcryptPassword, decryptPassword} = require('../helpers/baseHelper')
+const { createUserByEmail } = require('../helpers/validationSchemaHelper');
 
 class AuthController{
   async registration(req, res, next){
     try{
-      const {email, password, role} = req.body
-      if(!email) next(ApiError.badRequest('не задан email'))
-      if(!password) next(ApiError.badRequest('не задан password'))
-      
-      const candidate = await UserService.getOneByEmail(email)
-      if(!isEmptyObj(candidate)) next(ApiError.badRequest('ЮЗЕР СУЩЕСТВУЕТ'))
-      
-      const hashPassword = await bcryptPassword(password)
+      req.body.role = req.params.role
+      const provider = req.params.provider
+      let userData
+      switch (provider) {
+        case "email":
+          const validateByEmail = await createUserByEmail.validateAsync(req.body);
+          userData = await createByEmail(validateByEmail)
+          break;
+        case "phone":
+          const validateByPhone = await createUserByPhone.validateAsync(req.body);
+          userData = await createByPhone(validateByPhone)
+          break;
+        case "google":
+        
+          break;
+        case "facebook":
+        
+          break;
+        default:
+          console.log("Что-то пошло не так, это не должно было выполниться ( ! )")
+          break;
+      }
 
-      const user = await UserService.create(email, hashPassword, role)
-      const basket = await BasketService.create(user.id)
-      const access_jwt = TokenService.createAccessToken(user.id)
-      
-      return res.json({access: access_jwt})
+      res.cookie('refreshToken', userData.refresh_jwt, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly:true})
+      res.json(userData)
+
     }catch(err){
       next(err)
     }  
@@ -41,6 +54,10 @@ class AuthController{
     }catch(err){
       next(err)
     }
+  }
+
+  logout(req, res, next){
+    return res.json({message: "bye"})
   }
 
   async check(req, res, next){
