@@ -1,8 +1,8 @@
 const {createUserByEmail} = require('../services/userService')
 
 const {ApiError} = require('../errors/ApiError')
-const {isEmptyObj, bcryptPassword, decryptPassword} = require('../helpers/baseHelper')
-const { validateCreateUserByEmail } = require('../helpers/validationSchemaHelper');
+const {isEmptyObj} = require('../helpers/baseHelper')
+const { validateCreateUserByEmail, validateCreateUserByPhone } = require('../helpers/validationSchemaHelper');
 
 class AuthController{
   async registration(req, res, next){
@@ -16,7 +16,7 @@ class AuthController{
           userData = await createUserByEmail(validateByEmail)
           break;
         case "phone":
-          const validateByPhone = await createUserByPhone.validateAsync(req.body);
+          const validateByPhone = await validateCreateUserByPhone.validateAsync(req.body);
           userData = await createUserByPhone(validateByPhone)
           break;
         case "google":
@@ -36,6 +36,14 @@ class AuthController{
     }catch(err){
       next(err)
     }  
+  }
+
+  async activateUser(req, res, next){
+    try{
+
+    }catch(err){
+      next(err)
+    }
   }
 
   async login(req, res, next){

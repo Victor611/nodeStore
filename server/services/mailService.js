@@ -1,5 +1,6 @@
 const jade = require('jade');
 const nodemailer = require('nodemailer');
+const path = require('path')
 
 class MailService {
     transporter;
@@ -16,14 +17,16 @@ class MailService {
         this.sendActivationMail = this.sendActivationMail.bind(this)
     }
     async sendActivationMail (to, link) {
-        const auth_email_layout = jade.compile(__dirname, 'views/auth_email');
-        console.log(auth_email_layout)
+        var templateDir = path.normalize(__dirname +'/../views/auth_email.jade');
+        var html = jade.renderFile(templateDir, {link:link});
+        
+        
         await this.transporter.sendMail({
             from:  process.env.MAIL_USER,
             to,
             text: '',
             subject: "Активация аккаунта на "+ process.env.API_URL,
-            html: auth_email_layout,
+            html,
         })  
     }
 }
