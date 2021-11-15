@@ -1,11 +1,11 @@
 const path = require('path');
 
-const {create, getAll, getOne, createInfo} = require('../services/deviceService');
+const {createDevice, getDevices, getDevice, createInfo} = require('../services/deviceService');
 const {ApiError} = require('../errors/ApiError');
 const {isEmptyObj, imageMime, randomString} = require('../helpers/baseHelper');
 
 class DeviceController{
-  async create(req, res, next){
+  async createDevice(req, res, next){
     try {
       if(req.files === null) throw ApiError.badRequest('FILE NOT FOUND')
 
@@ -15,7 +15,7 @@ class DeviceController{
       let fileName = randomString + imageMime(img.mimetype)
       img.mv(path.resolve(__dirname, '..', 'public/images', fileName))
 
-      const device = await create(name, price, brandId, typeId, fileName)
+      const device = await createDevice(name, price, brandId, typeId, fileName)
       
       if(info){
         info = JSON.parse(info)
@@ -30,16 +30,16 @@ class DeviceController{
 
   }
 
-  async getAll(req, res){
+  async getDevices(req, res){
     const {brandId, typeId, limit, page} = req.query
-    const devices = await getAll(brandId, typeId, limit, page)
+    const devices = await getDevices(brandId, typeId, limit, page)
     if(isEmptyObj(devices)) return res.status(204).send('ДЕВАЙСЫ НЕ НАЙДЕН');
     res.json(devices)
   }
 
-  async getOne(req, res){
+  async getDevice(req, res){
     const{id} = req.params
-    const device = await getOne(id)
+    const device = await getDevice(id)
     if(isEmptyObj(device)) return res.status(204).send('ДЕВАЙС НЕ НАЙДЕН');
     res.json(device)
   }

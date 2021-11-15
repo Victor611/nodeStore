@@ -10,7 +10,7 @@ const {encryptPassword} = require('../helpers/passwordHelper');
 const {UserEmailDTO} = require('../helpers/userDTOHelper');
 
 class UserService{
-  async createByEmail(data){
+  async createUserByEmail(data){
    
     const {email, password, role, first_name} = data
     const hashPassword = await encryptPassword(password) 
@@ -18,21 +18,22 @@ class UserService{
     const existed = await Email.findOne( {where: {email}} )
     if(existed) throw ApiError.forbiden(`Пользователь с почтовым адресом ${email} уже существует`)
   
-    const user = await User.create({role, first_name})
-    const emailByUser = await user.createEmail({email, hashPassword, activationLink: hashPassword})
-    const basket = await user.createBasket()
-    if(isEmptyObj(user) && isEmptyObj(emailByUser) && isEmptyObj(basket)) throw ApiError.internal(`Юзер с почтовым адресом ${email} не был создан`)
+    // const user = await User.create({role, first_name})
+    // const emailByUser = await user.createEmail({email, hashPassword, activationLink: hashPassword})
+    // const basketByUser = await user.createBasket()
+    // if(isEmptyObj(user) && isEmptyObj(emailByUser) && isEmptyObj(basket)) throw ApiError.internal(`Юзер с почтовым адресом ${email} не был создан`)
     
-    await sendActivationMail(email, hashPassword);
+    await sendActivationMail(email, `${process.env.API_URL}/api/auth/activate/email/${hashPassword}`);
+    
     const userDTO = UserEmailDTO(emailByUser);
     const access_jwt = generateAccessToken({...userDTO});
     const refresh_jwt = generateRefreshToken({...userDTO});
     const token = await saveToken(user.id, refresh_jwt)
     
-    return {user:{...user}, email: {...emailByUser}, basket:{...basket}, token:{...token}, access_jwt, refresh_jwt}
+    return {user:{...user}, email: {...emailByUser}, basket:{...basketByUser}, token:{...token}, access_jwt, refresh_jwt}
   }
 
-  async createByPhone(data){
+  async createUserByPhone(data){
    
     const {phone, password, role, first_name} = data
     const hashPassword = await encryptPassword(password) 
@@ -57,25 +58,25 @@ class UserService{
   
  
 
-  async getAll(req, res){
+  async getAllUsers(req, res){
     
   }
 
-  async getOneById(id){
+  async getOneUserById(id){
     const user = await User.findOne( {where: {id}} )
     return user===null ?  {} : user.dataValues
   }
 
-  async getOneByEmail(email){
+  async getOneUserByEmail(email){
     const user = await User.findOne( {where: {email}} )
     return user===null ?  {} : user.dataValues 
   }
 
-  async update(req, res){
+  async updateUser(req, res){
 
   }
 
-  async delete(req, res){
+  async destroyUser(req, res){
 
   }
 }

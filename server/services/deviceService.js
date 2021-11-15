@@ -1,7 +1,7 @@
 const {Device, DeviceInfo} = require('../models/models');
 const {ApiError} = require('../errors/ApiError');
 const {isEmptyObj} = require('../helpers/baseHelper');
-const { getOne } = require('../controllers/deviceController');
+
 
 class DeviceService{
   
@@ -9,13 +9,13 @@ class DeviceService{
     img = name file image
   */
 
-  async create(name, price, brandId, typeId, img){
+  async createDevice(name, price, brandId, typeId, img){
     const created = await Device.create({name, price, brandId, typeId, img})
     if(isEmptyObj(created)) throw ApiError.internal("DEVICE WAS NOT CREATED")
     return created.dataValues 
   }
 
-  async getAll(brandId, typeId, limit, page){
+  async getDevices(brandId, typeId, limit, page){
     page = page || 1
     limit = limit || 10
     let offset = page * limit - limit
@@ -31,7 +31,7 @@ class DeviceService{
     return finded
   }
 
-  async getOne(id){
+  async getDevice(id){
     const device = await Device.findOne({
       where: {id}, 
       include: [{model: DeviceInfo, as: 'info'}]

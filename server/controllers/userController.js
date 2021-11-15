@@ -1,23 +1,23 @@
 const ApiError = require('../errors/ApiError');
 
 class UserController{
-  async getAll(req, res){
+  async getUsers(req, res){
     
   }
 
-  async getOne(req,res){
+  async getUser(req,res){
     
   }
   
-  async create(req, res){
+  async createUser(req, res){
 
   }
  
-  async update(req, res){
+  async updateUser(req, res){
 
   }
 
-  async delete(req, res){
+  async destroyUser(req, res){
 
   }
 }

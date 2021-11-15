@@ -1,10 +1,8 @@
-const {createByEmail} = require('../services/userService')
-const BasketService = require('../services/basketService');
-const TokenService = require('../services/tokenService');
+const {createUserByEmail} = require('../services/userService')
 
 const {ApiError} = require('../errors/ApiError')
 const {isEmptyObj, bcryptPassword, decryptPassword} = require('../helpers/baseHelper')
-const { createUserByEmail } = require('../helpers/validationSchemaHelper');
+const { validateCreateUserByEmail } = require('../helpers/validationSchemaHelper');
 
 class AuthController{
   async registration(req, res, next){
@@ -14,12 +12,12 @@ class AuthController{
       let userData
       switch (provider) {
         case "email":
-          const validateByEmail = await createUserByEmail.validateAsync(req.body);
-          userData = await createByEmail(validateByEmail)
+          const validateByEmail = await validateCreateUserByEmail.validateAsync(req.body);
+          userData = await createUserByEmail(validateByEmail)
           break;
         case "phone":
           const validateByPhone = await createUserByPhone.validateAsync(req.body);
-          userData = await createByPhone(validateByPhone)
+          userData = await createUserByPhone(validateByPhone)
           break;
         case "google":
         
@@ -31,9 +29,9 @@ class AuthController{
           console.log("Что-то пошло не так, это не должно было выполниться ( ! )")
           break;
       }
-
-      res.cookie('refreshToken', userData.refresh_jwt, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly:true})
-      res.json(userData)
+      const refresh_jwt = userData.refresh_jwt
+      delete userData.refresh_jwt
+      return res.cookie('refreshToken', refresh_jwt, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly:true}).json(userData)
 
     }catch(err){
       next(err)
@@ -42,15 +40,15 @@ class AuthController{
 
   async login(req, res, next){
     try{
-      const {email, password} = req.body
+      // const {email, password} = req.body
     
-      const user = await UserService.getOneByEmail(email)
-      if(isEmptyObj(user)) next(ApiError.badRequest('ЮЗЕР НЕ СУЩЕСТВУЕТ'))
+      // const user = await UserService.getOneUserByEmail(email)
+      // if(isEmptyObj(user)) next(ApiError.badRequest('ЮЗЕР НЕ СУЩЕСТВУЕТ'))
 
-      decryptPassword(password, user.password)
+      // decryptPassword(password, user.password)
 
-      const access_jwt = TokenService.createAccessToken(user.id)
-      return res.json({access: access_jwt})
+      // const access_jwt = TokenService.createAccessToken(user.id)
+      // return res.json({access: access_jwt})
     }catch(err){
       next(err)
     }
