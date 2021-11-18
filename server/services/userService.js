@@ -18,10 +18,10 @@ class UserService{
     const existed = await Email.findOne( {where: {email}} )
     if(existed) throw ApiError.forbiden(`Пользователь с почтовым адресом ${email} уже существует`)
   
-    // const user = await User.create({role, first_name})
-    // const emailByUser = await user.createEmail({email, hashPassword, activationLink: hashPassword})
-    // const basketByUser = await user.createBasket()
-    // if(isEmptyObj(user) && isEmptyObj(emailByUser) && isEmptyObj(basket)) throw ApiError.internal(`Юзер с почтовым адресом ${email} не был создан`)
+    const user = await User.create({role, first_name})
+    const emailByUser = await user.createEmail({email, hashPassword, activationLink})
+    const basket = await user.createBasket()
+    if(isEmptyObj(user) && isEmptyObj(emailByUser) && isEmptyObj(basket)) throw ApiError.internal(`Юзер с почтовым адресом ${email} не был создан`)
     
     await sendActivationMail(email, `${process.env.API_URL}/api/auth/activate/email/${hashPassword}`);
     
@@ -40,7 +40,7 @@ class UserService{
     const activationLink = getRandomInt(1e5, 1e6)
 
     const existed = await Phone.findOne( {where: {phone}} )
-    if(existed) throw ApiError.forbiden(`Пользователь с почтовым адресом ${phone} уже существует`)
+    if(existed) throw ApiError.forbiden(`Пользователь с номером телефона ${phone} уже существует`)
   
     const user = await User.create({role, first_name})
     const phoneByUser = await user.createPhone({phone, hashPassword, activationLink})
