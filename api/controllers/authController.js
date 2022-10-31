@@ -3,17 +3,18 @@ const {createUserByEmail} = require('../services/userService')
 const {ApiError} = require('../errors/ApiError')
 const {isEmptyObj} = require('../helpers/baseHelper')
 const { validateCreateUserByEmail, validateCreateUserByPhone } = require('../helpers/validationSchemaHelper');
+const { UserEmailDTO } = require('../helpers/userDTOHelper');
 
 class AuthController{
   async registration(req, res, next){
-    try{
+    try{ 
       req.body.role = req.params.role
       const provider = req.params.provider
       let userData
       switch (provider) {
         case "email":
           const validateByEmail = await validateCreateUserByEmail.validateAsync(req.body);
-          userData = await createUserByEmail(validateByEmail)
+          userData = await createUserByEmail(validateByEmail);
           break;
         case "phone":
           const validateByPhone = await validateCreateUserByPhone.validateAsync(req.body);

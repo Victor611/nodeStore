@@ -1,4 +1,4 @@
-const jade = require('jade');
+const pug = require('pug');
 const nodemailer = require('nodemailer');
 const path = require('path')
 
@@ -17,9 +17,9 @@ class MailService {
         this.sendActivationMail = this.sendActivationMail.bind(this)
     }
     async sendActivationMail (to, link) {
-        var templateDir = path.normalize(__dirname +'/../views/auth_email.jade');
-        var html = jade.renderFile(templateDir, {link:link});
-        
+        var templateDir = path.normalize(`${__dirname}/../views/auth_email.pug`);
+    
+        var html = pug.compileClient(templateDir, {link:link});
         
         await this.transporter.sendMail({
             from:  process.env.MAIL_USER,

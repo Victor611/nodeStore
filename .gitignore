@@ -1,2 +1,2 @@
-/server/node_modules
-/server/public/images
+/api/public/images
+/api/node_modules
