@@ -1,5 +1,5 @@
-const { createUserByEmail } = require('../services/userService')
-
+const { createUserByEmail, createUserByPhone } = require('../services/userService')
+const { activateUserByEmail, activateUserByPhone } = require('../services/userService')
 const { ApiError } = require('../errors/ApiError')
 const { isEmptyObj } = require('../helpers/baseHelper')
 const { validateCreateUserByEmail, validateCreateUserByPhone } = require('../helpers/validationSchemaHelper');
@@ -38,10 +38,23 @@ class AuthController {
       next(err)
     }
   }
-
-  async activateUser(req, res, next) {
+// need test
+  async activate(req, res, next) {
     try {
-      console.log(req.query.link)
+      const provider = req.params.provider
+      const link = req.params.link
+      let userData
+      switch (provider) {
+        case "email":
+          userData = await activateUserByEmail(link);
+        break;
+        case "phone":
+          userData = await activateUserByPhone(link);
+        default:
+          console.log("Что-то пошло не так, это не должно было выполниться ( ! )")
+        break;
+      }
+      return res.redirect(process.env.CLIENT_URL).json(userData);
     } catch (err) {
       next(err)
     }

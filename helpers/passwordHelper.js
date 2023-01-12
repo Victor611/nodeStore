@@ -6,7 +6,7 @@ module.exports.encryptPassword = async (password) => {
     return hashPassword;
   }
   
-  module.exports.decryptPassword = (password, userPassword) => {
+module.exports.decryptPassword = (password, userPassword) => {
     const comparePasword = bcryptjs.compareSync(password, userPassword)
     if(!comparePasword) throw ApiError.badRequest(`неверный пароль`);
     return true

@@ -2,7 +2,9 @@ POST http://localhost:5000/api/auth/registration/user/email
 Content-Type: application/json
 
 {
-    "email":"222222222@gmail.com",
+    "email":"123456@gmail.com",
     "password":"123456",
     "first_name":"123456"
 }
+
+GET http://localhost:5000/api/auth/activate/email/813566

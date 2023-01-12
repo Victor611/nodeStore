@@ -7,7 +7,7 @@ const { generateAccessToken, generateRefreshToken, saveToken } = require('../ser
 
 const { isEmptyObj, getRandomInt } = require('../helpers/baseHelper');
 const { encryptPassword } = require('../helpers/passwordHelper');
-const { UserEmailDTO } = require('../helpers/userDTOHelper');
+const { UserEmailDTO, UserDTO } = require('../helpers/userDTOHelper');
 
 class UserService {
   async createUserByEmail(data) {
@@ -23,15 +23,16 @@ class UserService {
     const emailByUser = await user.createEmail({ email, hashPassword, activationLink })
     const basketByUser = await user.createBasket()
 
-
-    await sendActivationMail(email, `${process.env.API_URL}/api/auth/activate/email/?link=${hashPassword}`);
-    if (isEmptyObj(user) && isEmptyObj(emailByUser) && isEmptyObj(basketByUser)) throw ApiError.internal(`Юзер с почтовым адресом ${email} не был создан`)
+    sendActivationMail(email, `${process.env.API_URL}/api/auth/activate/email/${activationLink}`);
+    if (isEmptyObj(user) && isEmptyObj(emailByUser) && isEmptyObj(basketByUser)) {
+      throw ApiError.internal(`Юзер с почтовым адресом ${email} не был создан`)
+    }
     const userDTO = UserEmailDTO(emailByUser);
     const access_jwt = generateAccessToken({ ...userDTO });
     const refresh_jwt = generateRefreshToken({ ...userDTO });
     const token = await saveToken(user.id, refresh_jwt)
 
-    return { user: { ...user }, email: { ...emailByUser }, basket: { ...basketByUser }, token: { ...token }, access_jwt, refresh_jwt }
+   return { user: { ...user }, email: { ...emailByUser }, basket: { ...basketByUser }, token: { ...token }, access_jwt, refresh_jwt }
   }
 
   async createUserByPhone(data) {
@@ -47,17 +48,48 @@ class UserService {
     const phoneByUser = await user.createPhone({ phone, hashPassword, activationLink })
     const basket = await user.createBasket()
     if (isEmptyObj(user) && isEmptyObj(emailByUser) && isEmptyObj(basket)) throw ApiError.internal(`Юзер с почтовым адресом ${phone} не был создан`)
-
-    await sendActivationSMS(phone, activationLink);
+//????? нет активации по тел
+    await sendActivationMail(phone, activationLink);
     const userDTO = UserPhoneDTO(phoneByUser);
     const access_jwt = generateAccessToken({ ...userDTO });
     const refresh_jwt = generateRefreshToken({ ...userDTO });
     const token = await saveToken(user.id, refresh_jwt)
 
-    return { user: { ...user }, email: { ...phoneByUser }, basket: { ...basket }, token: { ...token }, access_jwt, refresh_jwt }
+    return { user: { ...user }, phone: { ...phoneByUser }, basket: { ...basket }, token: { ...token }, access_jwt, refresh_jwt }
   }
 
+  //?логика при успешной активации
+  async activateUserByEmail(activationLink) {
+    await Email.findOne({ where: { activationLink }, include: User })
+    .then(async userEmail => {
+      userEmail.activate = true;
+      const user = await userEmail.user.update({activate: true})
+        .then(userResult => { 
+          return UserDTO(userResult.dataValues);
+        });
+      const emailByUser = await userEmail.save()
+        .then(userEmailResult => {
+          return UserEmailDTO( userEmailResult.dataValues );
+        });
+      return { user, email: emailByUser };
+    })
+    .catch((err) =>{
+      throw ApiError.forbiden(`Некоректная ссылка активации`)
+    })  
+  }
 
+  async activateUserByPhone(link) {
+    await Phone.findOne({ where: { activationLink }, include: User })
+    .then(userPhone => {
+      userPhone.activate = true;
+      const user = userPhone.user.update({activate: true})
+      const phoneByUser = userPhone.save();
+      return { user: { ...user }, phone: { ...phoneByUser } }
+    })
+    .catch((err) =>{
+      throw ApiError.forbiden(`Некоректная ссылка активации`)
+    })
+  }
 
   async getAllUsers(req, res) {
 
@@ -70,6 +102,11 @@ class UserService {
 
   async getOneUserByEmail(email) {
     const user = await User.findOne({ where: { email } })
+    return user === null ? {} : user.dataValues
+  }
+
+  async getOneUserByPhone(phone) {
+    const user = await User.findOne({ where: { phone } })
     return user === null ? {} : user.dataValues
   }
 
