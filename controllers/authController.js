@@ -54,7 +54,8 @@ class AuthController {
           console.log("Что-то пошло не так, это не должно было выполниться ( ! )")
         break;
       }
-      return res.redirect(process.env.CLIENT_URL).json(userData);
+      console.log('active',userData);
+      //return res.redirect(process.env.CLIENT_URL).json(userData);
     } catch (err) {
       next(err)
     }

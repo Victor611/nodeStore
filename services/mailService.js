@@ -22,7 +22,7 @@ class MailService {
         var html = pug.renderFile(templateDir, { link: link });
 
         await this.transporter.sendMail({
-            from: process.env.MAIL_USER,
+            from: process.env.MAIL_ADMIN,
             to,
             text: '',
             subject: "Активация аккаунта на " + process.env.API_URL,

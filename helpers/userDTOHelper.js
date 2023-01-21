@@ -1,10 +1,3 @@
-module.exports.UserEmailDTO = (model) => {
-    this.email = model.email;
-    this.id = model.userId;
-    this.isActivated = model.isActivated;
-    return this;
-}
-
 module.exports.UserDTO = (model) => {
     this.id = model.id,
     this.first_name = model.first_name,

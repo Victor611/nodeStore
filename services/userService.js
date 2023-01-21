@@ -7,7 +7,8 @@ const { generateAccessToken, generateRefreshToken, saveToken } = require('../ser
 
 const { isEmptyObj, getRandomInt } = require('../helpers/baseHelper');
 const { encryptPassword } = require('../helpers/passwordHelper');
-const { UserEmailDTO, UserDTO } = require('../helpers/userDTOHelper');
+const { UserEmailDTO} = require('../helpers/userEmailDTOHelper');
+const { UserDTO } = require('../helpers/userDTOHelper');
 
 class UserService {
   async createUserByEmail(data) {
@@ -60,22 +61,22 @@ class UserService {
 
   //?логика при успешной активации
   async activateUserByEmail(activationLink) {
-    await Email.findOne({ where: { activationLink }, include: User })
-    .then(async userEmail => {
-      userEmail.activate = true;
-      const user = await userEmail.user.update({activate: true})
-        .then(userResult => { 
-          return UserDTO(userResult.dataValues);
-        });
-      const emailByUser = await userEmail.save()
-        .then(userEmailResult => {
-          return UserEmailDTO( userEmailResult.dataValues );
-        });
-      return { user, email: emailByUser };
-    })
-    .catch((err) =>{
-      throw ApiError.forbiden(`Некоректная ссылка активации`)
-    })  
+    const userEmail = await Email.findOne({ where: { activationLink }, include: User })
+    if(!userEmail) {throw ApiError.forbiden(`Некоректная ссылка активации`)};
+   // const userEmail = query.toJSON();
+    //if(userEmail.activate && userEmail.user.activate){throw ApiError.forbiden(`Email ${userEmail.email} уже активирован`)}
+    userEmail.activate = true;
+    const resultUser = await userEmail.user.update({activate: true})
+    const user = UserDTO(resultUser.toJSON());
+    console.log({...user});
+    const resultEmailByUser = await userEmail.save()
+//     const emailByUser = UserEmailDTO(resultEmailByUser.toJSON());
+// console.log({...emailByUser}); 
+    // .then(result => {
+      //   const userEmailResult = result.toJSON();
+      //   return UserEmailDTO( userEmailResult );
+      // });
+    return { user  };
   }
 
   async activateUserByPhone(link) {
