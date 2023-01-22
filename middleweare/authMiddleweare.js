@@ -1,3 +1,4 @@
+const { ApiError } = require('../errors/ApiError');
 const {decodeAccessToken} = require('../services/tokenService');
 
 module.exports = function (req, res, next){
@@ -12,6 +13,6 @@ module.exports = function (req, res, next){
     req.token_userId = decoded
     next()
   }catch (err) {
-    res.status(401).json({message: "Не авторизован"})
+    throw ApiError.unauthorized(`Не авторизован`)
   }
 }

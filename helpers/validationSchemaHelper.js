@@ -13,3 +13,11 @@ module.exports.validateCreateUserByPhone = joi.object({
     role: joi.string().required(),
     first_name: joi.string().required()
 })
+
+module.exports.validateEmail = joi.object({
+    email: joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
+})
+
+module.exports.validatePhone = joi.object({
+    phone: joi.string().pattern(new RegExp("^\\+[0-9]*$")).required()
+})

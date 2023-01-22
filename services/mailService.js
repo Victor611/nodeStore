@@ -1,6 +1,7 @@
 const pug = require('pug');
 const nodemailer = require('nodemailer');
-const path = require('path')
+const path = require('path');
+const { resolve } = require('path');
 
 class MailService {
     transporter;
@@ -20,14 +21,24 @@ class MailService {
         var templateDir = path.normalize(`${__dirname}/../views/auth_email.pug`);
 
         var html = pug.renderFile(templateDir, { link: link });
-
-        await this.transporter.sendMail({
+        var options = {
             from: process.env.MAIL_ADMIN,
             to,
             text: '',
             subject: "Активация аккаунта на " + process.env.API_URL,
             html,
+        }
+        return new Promise((resolve,reject)=>{
+            this.transporter.sendMail(options, (error, info)=>{
+                if(error){
+                    console.log(error);
+                    reject(error);
+                }else{
+                    resolve(info);
+                }
+            })
         })
+            
     }
 }
 

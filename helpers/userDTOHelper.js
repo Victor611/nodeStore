@@ -1,9 +1,12 @@
 module.exports.UserDTO = (model) => {
-    this.id = model.id,
-    this.first_name = model.first_name,
-    this.last_name = model.last_name,
-    this.birthday = model.birthday,
-    this.gender = model.gender,
-    this.isActivated = model.activate;
-    return this;
+    const normalised = {
+        id: model.id,
+        first_name: model.first_name,
+        last_name: model.last_name,
+        birthday: model.birthday,
+        gender: model.gender,
+        isActivated: model.activate
+    }
+    
+    return normalised;
 }

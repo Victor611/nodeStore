@@ -9,8 +9,10 @@ const { isEmptyObj, getRandomInt } = require('../helpers/baseHelper');
 const { encryptPassword } = require('../helpers/passwordHelper');
 const { UserEmailDTO} = require('../helpers/userEmailDTOHelper');
 const { UserDTO } = require('../helpers/userDTOHelper');
+const { response } = require('express');
 
 class UserService {
+    //todo: need return DTO ???
   async createUserByEmail(data) {
 
     const { email, password, role, first_name } = data
@@ -24,7 +26,9 @@ class UserService {
     const emailByUser = await user.createEmail({ email, hashPassword, activationLink })
     const basketByUser = await user.createBasket()
 
-    sendActivationMail(email, `${process.env.API_URL}/api/auth/activate/email/${activationLink}`);
+    const sendMail = sendActivationMail(email, `${process.env.API_URL}/api/auth/activate/email/${activationLink}`)
+    .then(response=>{ return response; })
+    .catch(error=>{ throw ApiError.forbiden(`email не был отправлен`) })
     if (isEmptyObj(user) && isEmptyObj(emailByUser) && isEmptyObj(basketByUser)) {
       throw ApiError.internal(`Юзер с почтовым адресом ${email} не был создан`)
     }
@@ -59,38 +63,44 @@ class UserService {
     return { user: { ...user }, phone: { ...phoneByUser }, basket: { ...basket }, token: { ...token }, access_jwt, refresh_jwt }
   }
 
-  //?логика при успешной активации
+//todo:TTL activate link
   async activateUserByEmail(activationLink) {
     const userEmail = await Email.findOne({ where: { activationLink }, include: User })
     if(!userEmail) {throw ApiError.forbiden(`Некоректная ссылка активации`)};
-   // const userEmail = query.toJSON();
-    //if(userEmail.activate && userEmail.user.activate){throw ApiError.forbiden(`Email ${userEmail.email} уже активирован`)}
+    if(userEmail.activate && userEmail.user.activate){throw ApiError.forbiden(`Email ${userEmail.email} уже активирован`)}
     userEmail.activate = true;
     const resultUser = await userEmail.user.update({activate: true})
     const user = UserDTO(resultUser.toJSON());
-    console.log({...user});
     const resultEmailByUser = await userEmail.save()
-//     const emailByUser = UserEmailDTO(resultEmailByUser.toJSON());
-// console.log({...emailByUser}); 
-    // .then(result => {
-      //   const userEmailResult = result.toJSON();
-      //   return UserEmailDTO( userEmailResult );
-      // });
-    return { user  };
+    const emailByUser = UserEmailDTO(resultEmailByUser.toJSON()); 
+
+    return { user, email: emailByUser  };
   }
 
   async activateUserByPhone(link) {
-    await Phone.findOne({ where: { activationLink }, include: User })
-    .then(userPhone => {
-      userPhone.activate = true;
-      const user = userPhone.user.update({activate: true})
-      const phoneByUser = userPhone.save();
-      return { user: { ...user }, phone: { ...phoneByUser } }
-    })
-    .catch((err) =>{
-      throw ApiError.forbiden(`Некоректная ссылка активации`)
-    })
+    const query = await Phone.findOne({ where: { activationLink }, include: User })
+    if(!query) {throw ApiError.forbiden(`Некоректная ссылка активации`)};
+    const userPhone = query.toJSON();
+    //if(userPhone.activate && userPhone.user.activate){throw ApiError.forbiden(`Email ${userPhone.phone} уже активирован`)}
+    userPhone.activate = true;
+    const resultUser = await userPhone.user.update({activate: true})
+    const user = UserDTO(resultUser.toJSON());
+    const resultPhoneByUser = await userEmail.save()
+    const phoneByUser = UserEmailDTO(resultPhoneByUser.toJSON()); 
+
+    return { user, phone: phoneByUser  };
   }
+
+  async resendActivateUserByEmail(data) {
+    const {email} = data;
+    const userEmail = await Email.findOne({ where: { email }, include: User })
+    if(!userEmail) {throw ApiError.forbiden(`Пользователя с email ${email} не существует`)};
+    if(userEmail.activate && userEmail.user.activate){throw ApiError.forbiden(`Email ${userEmail.email} уже активирован`)}
+    return await sendActivationMail(userEmail.email, `${process.env.API_URL}/api/auth/activate/email/${userEmail.activationLink}`)
+    .then(response=>{ return response; })
+    .catch(error=>{ throw ApiError.forbiden(`email не был отправлен`) })
+  }
+
 
   async getAllUsers(req, res) {
 

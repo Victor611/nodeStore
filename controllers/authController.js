@@ -1,8 +1,10 @@
 const { createUserByEmail, createUserByPhone } = require('../services/userService')
 const { activateUserByEmail, activateUserByPhone } = require('../services/userService')
+const { resendActivateUserByEmail, resendActivateUserByPhone } = require('../services/userService')
 const { ApiError } = require('../errors/ApiError')
 const { isEmptyObj } = require('../helpers/baseHelper')
 const { validateCreateUserByEmail, validateCreateUserByPhone } = require('../helpers/validationSchemaHelper');
+const { validateEmail, validatePhone } = require('../helpers/validationSchemaHelper');
 const { UserEmailDTO } = require('../helpers/userDTOHelper');
 
 class AuthController {
@@ -38,11 +40,10 @@ class AuthController {
       next(err)
     }
   }
-// need test
+//todo: validate request
   async activate(req, res, next) {
     try {
-      const provider = req.params.provider
-      const link = req.params.link
+      const {provider, link} = req.params
       let userData
       switch (provider) {
         case "email":
@@ -54,8 +55,30 @@ class AuthController {
           console.log("Что-то пошло не так, это не должно было выполниться ( ! )")
         break;
       }
-      console.log('active',userData);
+      console.log(userData)
       //return res.redirect(process.env.CLIENT_URL).json(userData);
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  async resendActivate(req, res, next){
+    try {
+      const provider = req.params.provider
+      let userData
+      switch (provider) {
+        case "email":
+          const validateByEmail = await validateEmail.validateAsync(req.body);
+          userData = await resendActivateUserByEmail(validateByEmail);
+        break;
+        case "phone":
+          const validateByPhone = await validatePhone.validateAsync(req.body);
+          userData = await resendActivateUserByPhone(validateByPhone);
+        default:
+          console.log("Что-то пошло не так, это не должно было выполниться ( ! )")
+        break;
+      }
+      return res.json(userData);
     } catch (err) {
       next(err)
     }
