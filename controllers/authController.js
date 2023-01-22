@@ -1,11 +1,9 @@
-const { createUserByEmail, createUserByPhone } = require('../services/userService')
-const { activateUserByEmail, activateUserByPhone } = require('../services/userService')
-const { resendActivateUserByEmail, resendActivateUserByPhone } = require('../services/userService')
-const { ApiError } = require('../errors/ApiError')
-const { isEmptyObj } = require('../helpers/baseHelper')
+const { createUserByEmail, createUserByPhone } = require('../services/authService')
+const { activateUserByEmail, activateUserByPhone } = require('../services/authService')
+const { resendActivateUserByEmail, resendActivateUserByPhone } = require('../services/authService')
 const { validateCreateUserByEmail, validateCreateUserByPhone } = require('../helpers/validationSchemaHelper');
 const { validateEmail, validatePhone } = require('../helpers/validationSchemaHelper');
-const { UserEmailDTO } = require('../helpers/userDTOHelper');
+const { ApiError } = require('../errors/ApiError');
 
 class AuthController {
   async registration(req, res, next) {
@@ -85,16 +83,31 @@ class AuthController {
   }
 
   async login(req, res, next) {
-    try {
-      // const {email, password} = req.body
-
-      // const user = await UserService.getOneUserByEmail(email)
-      // if(isEmptyObj(user)) next(ApiError.badRequest('ЮЗЕР НЕ СУЩЕСТВУЕТ'))
-
-      // decryptPassword(password, user.password)
-
-      // const access_jwt = TokenService.createAccessToken(user.id)
-      // return res.json({access: access_jwt})
+    try { console.log(req)
+      const provider = req.params.provider
+      let userData
+      switch (provider) {
+        case "email": 
+         // const validateByEmail = await validateloginUserByEmail.validateAsync(req.body);
+          userData = await loginUserByEmail(req.body)
+          break;
+        case "phone":
+          const validateByPhone = await validateLoginUserByPhone(req.body);
+          userData = await loginUserByPhone(validateByPhone)
+          break;
+        case "google":
+          userData = await loginUserByGoogle(req.body)
+          break;
+        case "facebook":
+          userData = await loginUserByFacebook(req.body)
+          break;
+        default:
+          
+          break;
+      }
+      const refresh_jwt = userData.refresh_jwt
+      delete userData.refresh_jwt
+      return res.cookie('refreshToken', refresh_jwt, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true }).json(userData)
     } catch (err) {
       next(err)
     }
