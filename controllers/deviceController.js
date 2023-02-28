@@ -1,25 +1,28 @@
 const path = require('path');
 
+const {validateCreateByDevice} = require('../helpers/validationDeviceSchemaHelper')
+
 const {createDevice, getDevices, getDevice, createInfo} = require('../services/deviceService');
 const {ApiError} = require('../errors/ApiError');
-const {isEmptyObj, imageMime, randomString} = require('../helpers/baseHelper');
+const {isEmptyObj, imageMime, getRandomString} = require('../helpers/baseHelper');
 
 class DeviceController{
   async createDevice(req, res, next){
     try {
       if(req.files === null) throw ApiError.badRequest('FILE NOT FOUND')
 
-      const {name, price, brandId, typeId, info} = req.body
+      const validateDevice = await validateCreateByDevice.validateAsync(req.body);
+      const {name, price, brandId, typeId, info} = validateDevice
       const {img} = req.files
 
-      let fileName = randomString + imageMime(img.mimetype)
-      img.mv(path.resolve(__dirname, '..', 'public/images', fileName))
+      let fileName = getRandomString(20) + imageMime(img.mimetype)
+      img.mv(path.resolve(__dirname, '..', 'public/images/devices', fileName))
 
       const device = await createDevice(name, price, brandId, typeId, fileName)
       
       if(info){
         info = JSON.parse(info)
-        info.forEach( i => createInfo(i.title, i.description, device.id)) 
+        info.forEach( i => createInfo(i.title, i.description, i.deviceId)) 
       }
 
       return res.json(device)

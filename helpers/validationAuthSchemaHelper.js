@@ -21,3 +21,8 @@ module.exports.validateEmail = joi.object({
 module.exports.validatePhone = joi.object({
     phone: joi.string().pattern(new RegExp("^\\+[0-9]*$")).required()
 })
+
+module.exports.validateLoginUserByEmail = joi.object({
+    email: joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
+    password: joi.string().min(6).required()
+})

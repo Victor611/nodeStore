@@ -1,5 +1,5 @@
 const {ApiError} = require('../errors/ApiError'); 
-
+const crypto = import('node:crypto');
 
 
 module.exports.isEmptyObj = (obj) => {
@@ -27,3 +27,7 @@ module.exports.getRandomInt = (min, max) => {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min)) + min; //Максимум не включается, минимум включается
 };
+
+module.exports.getRandomString = (len = 40) => {
+    return crypto.randomBytes(len).toString('hex');
+}

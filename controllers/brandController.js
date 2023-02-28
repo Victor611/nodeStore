@@ -1,5 +1,5 @@
 const {ApiError} = require('../errors/ApiError');
-const {create, getAll} = require('../services/brandService');
+const {createBrand, getAll} = require('../services/brandService');
 const {isEmptyObj} = require('../helpers/baseHelper');
 
 class BrandController{
@@ -7,7 +7,7 @@ class BrandController{
     try{
       const {name} = req.body
       if(!name) throw ApiError.badRequest('не задано ИМЯ')
-      const brand = await create(name)
+      const brand = await createBrand(name)
       if(isEmptyObj (brand)) return res.status(204).send();
       return res.json(`Бренд ${brand.name} создан`)
     }catch (err){
@@ -15,7 +15,7 @@ class BrandController{
     }
   }
 
-  async getAll(req, res, next){
+  async getBrands(req, res, next){
     try{
       const brands = await getAll()
       if(isEmptyObj(brands)) return res.status(204).send(); 

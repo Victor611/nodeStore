@@ -4,13 +4,13 @@ const {isEmptyObj} = require('../helpers/baseHelper');
 
 class TypeService{
   
-  async create(name){
-    const created = await Type.create({name})
-    if(isEmptyObj(created)) throw ApiError.internal("TYPES WOS NOT CREATED")
-    return created.dataValues 
+  async createType(name){
+    const created = await Type.create({name});
+    if(!created) throw ApiError.internal("TYPES WAS NOT CREATED");
+    return created.toJSON(); 
   }
 
-  async getAll(){
+  async getAllTypes(){
     const finded = await Type.findAll()
     return finded
   }

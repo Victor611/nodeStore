@@ -10,7 +10,7 @@ class UserService {
 
   async getOneUserById(id) {
     const user = await User.findOne({ where: { id } })
-    return user === null ? {} : user.dataValues
+    return user;
   }
 
   async getOneUserByEmail(email) {

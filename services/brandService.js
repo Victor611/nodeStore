@@ -4,10 +4,10 @@ const {isEmptyObj} = require('../helpers/baseHelper');
 
 class BrandService{
   
-  async create(name){
+  async createBrand(name){
     const created = await Brand.create({name})
-    if(isEmptyObj(created)) throw ApiError.internal("BRANDS WAS NOT CREATED")
-    return created.dataValues 
+    if(!created) throw ApiError.internal("BRANDS WAS NOT CREATED")
+    return created.toJSON();
   }
 
   async getAll(){

@@ -1,0 +1,10 @@
+POST http://localhost:5000/type/
+content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjEyMzQ1NjdAZ21haWwuY29tIiwiaWQiOjIsImlzQWN0aXZhdGVkIjp0cnVlLCJpYXQiOjE2NzYxMjY0NzAsImV4cCI6MTY3NjEzMDA3MH0.yFYcmy8FSZ5BR2dszHdDIvo9SUu1G8L6akwIkfeUfd4
+
+{
+    "name":"Смартфоны"
+}
+###
+GET http://localhost:5000/type/
+###

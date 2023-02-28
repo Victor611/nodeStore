@@ -1,0 +1,40 @@
+POST http://localhost:5000/auth/registration/user/email
+content-Type: application/json
+
+{
+    "email":"1234567@gmail.com",
+    "password":"1234567",
+    "first_name":"1234567"
+}
+###
+POST http://localhost:5000/auth/registration/admin/email
+content-Type: application/json
+
+{
+    "email":"1234567@gmail.com",
+    "password":"1234567",
+    "first_name":"1234567"
+}
+###
+GET http://localhost:5000/auth/activate/email/701687
+###
+POST http://localhost:5000/auth/resend/activate/email
+content-Type: application/json
+
+{
+    "email":"1234567@gmail.com"
+}
+###
+POST http://localhost:5000/auth/login/email HTTP/1.1
+content-Type: application/json
+
+{
+    "email":"1234567@gmail.com",
+    "password":"1234567"
+}
+###
+GET  http://localhost:5000/auth/logout HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjEyMzQ1NjdAZ21haWwuY29tIiwiaWQiOjIsImlzQWN0aXZhdGVkIjp0cnVlLCJpYXQiOjE2NzU4MDEzMDIsImV4cCI6MTY3NTgwNDkwMn0.hmPpe0eSoqusb5VV6c5XmkPIuJQXBmdanHGA6NPikBE
+Cookie: refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjEyMzQ1NjdAZ21haWwuY29tIiwiaWQiOjIsImlzQWN0aXZhdGVkIjp0cnVlLCJpYXQiOjE2NzQ0Mjk1MDAsImV4cCI6MTY3NTAzNDMwMH0.BfrrzOg12veBhkXsFavy5UC8zba8GAGdLPrX6MgvBPA
+###
+GET  http://localhost:5000/auth/refresh HTTP/1.1

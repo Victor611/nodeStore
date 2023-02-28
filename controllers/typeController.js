@@ -1,29 +1,28 @@
 const {ApiError} = require('../errors/ApiError');
 const {create, getAll} = require('../services/typeService');
+const {validateCreateByType} = require('../helpers/validationTypeSchemaHelper')
 const {isEmptyObj} = require('../helpers/baseHelper');
 
 class TypeController{
   async create(req, res, next){
     try{
-      const {name} = req.body
-      if(!name) throw ApiError.badRequest('не задано ИМЯ')
-      const type = await create(name)
-      return res.json(`Тип ${type.name} создан`)
+      const validateByType = await validateCreateByType.validateAsync(req.body);  
+      const type = await createType(validateByType)
+      return res.json(`Тип ${validateByType.name} создан`)
     }catch (err){
      next(err)
     }
   }
 
-  async getAll(req, res, next){
+  async getTypes(req, res, next){
     try{
-      const types = await getAll()
-      if(isEmptyObj(types)) return res.status(204).send(); 
+      const types = await getAllTypes()
+      if(!types) return res.status(204).send(); 
       return res.json(types)
     }catch (err){
       next(err)
     }
   }
-
 }
 
 module.exports = new TypeController()

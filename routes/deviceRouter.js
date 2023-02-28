@@ -6,6 +6,6 @@ const checkRole = require('../middleweare/checkRoleMiddleweare');
 
 router.post('/', auth, checkRole("admin"), createDevice) 
 router.get('/', getDevices)
-router.get('/:id', getDevice)
+router.get('/:device', getDevice)
 
 module.exports = router;

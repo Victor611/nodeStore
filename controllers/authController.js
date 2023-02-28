@@ -1,9 +1,14 @@
 const { createUserByEmail, createUserByPhone } = require('../services/authService')
 const { activateUserByEmail, activateUserByPhone } = require('../services/authService')
 const { resendActivateUserByEmail, resendActivateUserByPhone } = require('../services/authService')
-const { validateCreateUserByEmail, validateCreateUserByPhone } = require('../helpers/validationSchemaHelper');
-const { validateEmail, validatePhone } = require('../helpers/validationSchemaHelper');
+const { loginUserByEmail, loginUserByPhone } = require('../services/authService')
+const { logout } = require('../services/authService')
+const { validateCreateUserByEmail, validateCreateUserByPhone } = require('../helpers/validationAuthSchemaHelper');
+const { validateEmail, validatePhone } = require('../helpers/validationAuthSchemaHelper');
+const { validateLoginUserByEmail } = require('../helpers/validationAuthSchemaHelper');
+
 const { ApiError } = require('../errors/ApiError');
+const authService = require('../services/authService')
 
 class AuthController {
   async registration(req, res, next) {
@@ -53,8 +58,7 @@ class AuthController {
           console.log("Что-то пошло не так, это не должно было выполниться ( ! )")
         break;
       }
-      console.log(userData)
-      //return res.redirect(process.env.CLIENT_URL).json(userData);
+      return res.redirect(process.env.CLIENT_URL).json(userData);
     } catch (err) {
       next(err)
     }
@@ -83,13 +87,13 @@ class AuthController {
   }
 
   async login(req, res, next) {
-    try { console.log(req)
+    try {
       const provider = req.params.provider
       let userData
       switch (provider) {
         case "email": 
-         // const validateByEmail = await validateloginUserByEmail.validateAsync(req.body);
-          userData = await loginUserByEmail(req.body)
+          const validateByEmail = await validateLoginUserByEmail.validateAsync(req.body);
+          userData = await loginUserByEmail(validateByEmail)
           break;
         case "phone":
           const validateByPhone = await validateLoginUserByPhone(req.body);
@@ -113,14 +117,28 @@ class AuthController {
     }
   }
 
-  logout(req, res, next) {
-    return res.json({ message: "bye" })
+  async logout(req, res, next) {
+    try {
+      const { refreshToken } = req.cookies;
+      const token = await logout(refreshToken);
+      res.clearCookie('refreshToken');
+      return res.json(token);
+    } catch (err) {
+      next(err);
+    }
   }
 
-  async check(req, res, next) {
-    const token_user = req.token_user
-    const access_jwt = TokenService.createAccessToken(token_user)
-    return res.json({ access: access_jwt })
+  async refresh(req, res, next) {
+    try {
+      const { refreshToken } = req.cookies;
+      const userData = await authService.refresh(refreshToken);
+      if(!userData){return res.redirect(401, process.env.CLIENT_URL+'/login')}
+      const refresh_jwt = userData.refresh_jwt
+      delete userData.refresh_jwt
+      return res.cookie('refreshToken', refresh_jwt, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true }).json(userData)
+    } catch (err) {
+      next(err);
+    }
   }
 }
 
